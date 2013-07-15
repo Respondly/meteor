@@ -83,6 +83,7 @@ _.extend(Library.prototype, {
   // refresh().
   get: function (name, throwOnError) {
     var self = this;
+
     var packageDir;
     var fromWarehouse = false;
 
@@ -159,6 +160,8 @@ _.extend(Library.prototype, {
         // period where we still have source trees in the warehouse
         // AND the unipackage format can't handle packages with
         // extensions, this will reduce startup time.
+        console.log('building package name', name);
+
         buildmessage.enterJob({
           title: "building package `" + name + "`",
           rootPath: packageDir

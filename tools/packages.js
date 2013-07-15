@@ -1884,9 +1884,12 @@ _.extend(Package.prototype, {
       _.each(sliceJson.resources, function (resource) {
         rejectBadPath(resource.file);
 
+        console.log('sliceBasePath',sliceBasePath);
+        console.log('resource.file',resource.file );
         var fd = fs.openSync(path.join(sliceBasePath, resource.file), "r");
         try {
           var data = new Buffer(resource.length);
+          console.log('resource.offset', resource.offset);
           var count = fs.readSync(
             fd, data, 0, resource.length, resource.offset);
         } finally {
