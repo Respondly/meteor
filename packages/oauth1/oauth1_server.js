@@ -20,8 +20,16 @@ OAuth._requestHandlers['1'] = function (service, query, res) {
       android: (query.android === "true")
     });
 
+    requestTokenOptions = {};
+    if(query.requestTokenOptions) {
+      var requestTokenParamNames = query.requestTokenOptions.split(',');
+      _.each(requestTokenParamNames, function(paramName) {
+        requestTokenOptions[paramName] = query[paramName];
+      });
+    }
+
     // Get a request token to start auth process
-    oauthBinding.prepareRequestToken(callbackUrl);
+    oauthBinding.prepareRequestToken(requestTokenOptions, callbackUrl);
 
     // Keep track of request token so we can verify it on the next step
     OAuth._storeRequestToken(
@@ -45,8 +53,15 @@ OAuth._requestHandlers['1'] = function (service, query, res) {
       redirectUrl = url.format(redirectUrlObj);
     }
 
-    // redirect to provider login, which will redirect back to "step 2" below
+    // Add any pass through parameters to the URL
+    if (query.authenticationOptions) {
+      var authenticationOptionParamNames = query.authenticationOptions.split(',');
+      _.each(authenticationOptionParamNames, function(paramName) {
+        redirectUrl += '&' + paramName + '=' + query[paramName];
+      });
+    }
 
+    // redirect to provider login, which will redirect back to "step 2" below
     res.writeHead(302, {'Location': redirectUrl});
     res.end();
   } else {
