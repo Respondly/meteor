@@ -1,7 +1,12 @@
 Twitter = {};
 
 // Request Twitter credentials for the user
-// @param options {optional}  XXX support options.requestPermissions
+// @param options {optional Object} with fields:
+// - requestPermissions {'read' or 'write'}
+//     Request a specific permission level from Twitter (Twitter's x_auth_access_type)
+//     If you nead RWD, leave this blank, and configure it in your Twitter app config
+// - forceLogin {Boolean}
+//     If true, tells Twitter to prompt for a new login
 // @param credentialRequestCompleteCallback {Function} Callback function to call on
 //   completion. Takes one argument, credentialToken on success, or Error on
 //   error.
@@ -40,6 +45,30 @@ Twitter.requestCredential = function (options, credentialRequestCompleteCallback
 
   var loginUrl = Meteor.absoluteUrl(loginPath);
 
+
+  // Prepare authentication options
+  var authenticationOptions = [];
+
+  if (options.forceLogin === true) {
+    loginUrl += '&force_login=true';
+    authenticationOptions.push('force_login');
+  }
+
+  if (authenticationOptions.length > 0)
+    loginUrl += '&authenticationOptions=' + authenticationOptions.join(',');
+
+  // Prepare request token options
+  var requestTokenOptions = [];
+
+  if (options.requestPermissions) {
+    loginUrl += '&x_auth_access_type=' + options.requestPermissions;
+    requestTokenOptions.push('x_auth_access_type');
+  }
+
+  if (requestTokenOptions.length > 0)
+    loginUrl += '&requestTokenOptions=' + requestTokenOptions.join(',');
+
+  // Initiate the login
   OAuth.launchLogin({
     loginService: "twitter",
     loginStyle: loginStyle,
@@ -47,4 +76,5 @@ Twitter.requestCredential = function (options, credentialRequestCompleteCallback
     credentialRequestCompleteCallback: credentialRequestCompleteCallback,
     credentialToken: credentialToken
   });
+
 };
