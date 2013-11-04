@@ -19,8 +19,16 @@ Oauth._requestHandlers['1'] = function (service, query, res) {
     var callbackUrl = Meteor.absoluteUrl("_oauth/twitter?close&state=" +
                                          query.state);
 
+    requestTokenOptions = {};
+    if(query.requestTokenOptions) {
+      var requestTokenParamNames = query.requestTokenOptions.split(',');
+      _.each(requestTokenParamNames, function(paramName) {
+        requestTokenOptions[paramName] = query[paramName];
+      });
+    }
+
     // Get a request token to start auth process
-    oauthBinding.prepareRequestToken(callbackUrl);
+    oauthBinding.prepareRequestToken(requestTokenOptions, callbackUrl);
 
     // Keep track of request token so we can verify it on the next step
     requestTokens[query.state] = {
@@ -37,6 +45,16 @@ Oauth._requestHandlers['1'] = function (service, query, res) {
     }
 
     // redirect to provider login, which will redirect back to "step 2" below
+    var redirectUrl = urls.authenticate + '?oauth_token=' + oauthBinding.requestToken;
+
+    // Add any pass through parameters to the URL
+    if (query.authenticationOptions) {
+      var authenticationOptionParamNames = query.authenticationOptions.split(',');
+      _.each(authenticationOptionParamNames, function(paramName) {
+        redirectUrl += '&' + paramName + '=' + query[paramName];
+      });
+    }
+
     res.writeHead(302, {'Location': redirectUrl});
     res.end();
   } else {
