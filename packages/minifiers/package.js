@@ -4,7 +4,7 @@ Package.describe({
 });
 
 Npm.depends({
-  "clean-css": "2.0.2",
+  "clean-css": "2.0.6",
   "uglify-js": "2.4.7"
 });
 
