@@ -6,11 +6,13 @@ Accounts.registerLoginHandler(function (options) {
 
   check(options.oauth, {credentialToken: String});
 
-  if (!Oauth.hasCredential(options.oauth.credentialToken)) {
-    // OAuth credentialToken is not recognized, which could be either
-    // because the popup was closed by the user before completion, or
-    // some sort of error where the oauth provider didn't talk to our
-    // server correctly and closed the popup somehow.
+  var result = Oauth.retrieveCredential(options.oauth.credentialToken);
+
+  if (!result) {
+    // OAuth credentialToken is not recognized, which could be either because the popup
+    // was closed by the user before completion, or some sort of error where
+    // the oauth provider didn't talk to our server correctly and closed the
+    // popup somehow.
     //
     // We assume it was user canceled and report it as such, using a
     // numeric code that the client recognizes (XXX this will get
@@ -25,7 +27,7 @@ Accounts.registerLoginHandler(function (options) {
              error: new Meteor.Error(
                Accounts.LoginCancelledError.numericError, "Login canceled") };
   }
-  var result = Oauth.retrieveCredential(options.oauth.credentialToken);
+
   if (result instanceof Error)
     // We tried to login, but there was a fatal error. Report it back
     // to the user.
