@@ -1,3 +1,9 @@
+var url = Npm.require('url');
+
+Oauth._allowedCallbackHostnames = [
+  url.parse(Meteor.absoluteUrl()).hostname
+];
+
 // connect middleware
 Oauth._requestHandlers['1'] = function (service, query, res) {
 
@@ -12,6 +18,20 @@ Oauth._requestHandlers['1'] = function (service, query, res) {
   if (query.requestTokenAndRedirect) {
     // step 1 - get and store a request token
 
+    var callbackUrl;
+    if (query.requestTokenAndRedirect === "true") {
+      callbackUrl = Meteor.absoluteUrl("_oauth/twitter?close&state=" +
+                                       query.state);
+    } else {
+      callbackUrl = query.requestTokenAndRedirect;
+      var callbackHostname = url.parse(callbackUrl).hostname;
+      if (! _.contains(Oauth._allowedCallbackHostnames, callbackHostname)) {
+        res.writeHead(400);
+        res.end();
+        return;
+      }
+    }
+
     requestTokenOptions = {};
     if(query.requestTokenOptions) {
       var requestTokenParamNames = query.requestTokenOptions.split(',');
@@ -21,7 +41,7 @@ Oauth._requestHandlers['1'] = function (service, query, res) {
     }
 
     // Get a request token to start auth process
-    oauthBinding.prepareRequestToken(requestTokenOptions, query.requestTokenAndRedirect);
+    oauthBinding.prepareRequestToken(requestTokenOptions, callbackUrl);
 
     // Keep track of request token so we can verify it on the next step
     Oauth._storeRequestToken(query.state,
