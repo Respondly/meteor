@@ -47,6 +47,7 @@ var _cleanupHandle = Meteor.setInterval(_cleanStaleResults, 60 * 1000);
 // @param requestTokenSecret {string}
 //
 Oauth._storeRequestToken = function (key, requestToken, requestTokenSecret) {
+  check(key, String);
   Oauth._pendingRequestTokens.insert({
     key: key,
     requestToken: requestToken,
