@@ -38,10 +38,14 @@ var _cleanupHandle = Meteor.setInterval(_cleanStaleResults, 60 * 1000);
 // @param credential {string}   The credential to store
 //
 Oauth._storePendingCredential = function (key, credential) {
+  check(key, String);
+
   if (credential instanceof Error)
     credential = storableError(credential);
 
-  Oauth._pendingCredentials.insert({
+  OAuth._pendingCredentials.upsert({
+    key: key
+  }, {
     key: key,
     credential: credential,
     createdAt: new Date()
