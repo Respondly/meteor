@@ -43,7 +43,7 @@ Oauth._storePendingCredential = function (key, credential) {
   if (credential instanceof Error)
     credential = storableError(credential);
 
-  OAuth._pendingCredentials.upsert({
+  Oauth._pendingCredentials.upsert({
     key: key
   }, {
     key: key,
